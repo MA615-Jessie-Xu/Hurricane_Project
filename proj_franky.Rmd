@@ -1,0 +1,134 @@
+---
+title: "proj_franky"
+author: "Franky Zhang"
+date: "11/10/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(drat)
+library(hurricaneexposuredata)
+library(hurricaneexposure)
+library(weathermetrics)
+library(geoR)
+library(dplyr)
+```
+
+# load Haviland's 'hmapper' function  
+
+```{r}
+hmapper <- function(hurr){
+    
+    rmap = map_counties(storm = hurr, metric = "rainfall") +
+            ggtitle(hurr) +
+            theme(plot.title = element_text(hjust = 0.5))
+
+    wmap = map_counties(storm = hurr, metric = "wind") +
+            ggtitle(hurr) +
+            theme(plot.title = element_text(hjust = 0.5))
+
+    expos = map_rain_exposure(storm =hurr, 
+                  rain_limit = 100, 
+                  dist_limit = 500, 
+                  days_included =-5:3) +
+                    ggtitle(hurr) +
+                    theme(plot.title = element_text(hjust = 0.5))
+
+    ml <-  list(rmap, wmap, expos)
+    names(ml) <- c("rmap", "wmap", "expos")
+    
+    return(ml)
+}
+```
+
+## data wrangling
+
+# load "hurr_Humberto2007" data 
+
+```{r}
+addRepo("geanders")
+
+hurr_Humberto2007         <- hurricaneexposuredata::hurr_tracks %>% subset(storm_id == "Humberto-2007")
+rain_Humberto2007         <- hurricaneexposuredata::rain %>% subset(storm_id == "Humberto-2007")
+wind_Humberto2007         <- hurricaneexposuredata::storm_winds %>% subset(storm_id == "Humberto-2007")
+closest_dist_Humberto2007 <- hurricaneexposuredata::closest_dist %>% subset(storm_id == "Humberto-2007")
+# wind_Humberto2007 %>% count(fips) # 2396 counties 
+# rain_Humberto2007 %>% count(fips) # 2396 counties
+# closest_dist_Humberto2007 %>% count(fips) # 2396 counties
+county_center <- hurricaneexposuredata::county_centers
+county_center %>% count(fips) # 3221 counties
+# notations: 
+# fips: county's 5-digit federal information processing standard code
+# vmax_gust: max gust wind speed
+# vmax_sust: max sustained wind speed
+# gust_dur: Time(by minutes) gust wind was above 20 m / s in the county during the storm.
+# sust_dur: Time(by minutes) sustained wind was above 20 m / s in the county during the storm.
+
+plot_Humberto2007 <- hmapper("Humberto-2007")
+plot_Humberto2007$rmap
+plot_Humberto2007$wmap
+plot_Humberto2007$expos
+```
+
+# subset by exposure
+
+```{r}
+hurr = "Humberto-2007"
+# set dist_limit = 500 to define exposure. 
+map_rain_exposure(storm = hurr, 
+      rain_limit = 0, 
+      dist_limit = 160, 
+      days_included =-5:3) +
+        ggtitle(hurr) +
+        theme(plot.title = element_text(hjust = 0.5))
+# distance visualizaiton 
+map_counties(storm = hurr, 
+             metric = "distance", 
+             add_track = TRUE) 
+# two wind speed type(gust wind and sustained wind) and two wind duration type(gust wind duration and sustained wind duration)
+# difference between gust wind and sustained wind:
+# The fundamental difference between the two is duration. 
+# A sustained wind is defined as the average wind speed over two minutes. 
+# A sudden burst in wind speed is called the wind gusts and typically lasts under 20 seconds.
+map_counties(storm = hurr, 
+             metric = "wind",
+             wind_var = "vmax_sust", 
+             add_track = TRUE) 
+map_counties(storm = hurr, 
+             metric = "wind",
+             wind_var = "vmax_gust", 
+             add_track = TRUE) 
+map_counties(storm = hurr, 
+             metric = "wind",
+             wind_var = "sust_dur", 
+             add_track = TRUE) 
+map_counties(storm = hurr, 
+             metric = "wind",
+             wind_var = "gust_dur", 
+             add_track = TRUE) 
+
+# subset rain and wind data to these 117 counties
+expo_county <- closest_dist_Humberto2007 %>% subset(storm_dist < 160) # filter 117 exposure counties 
+expo_rain   <- rain_Humberto2007 %>% inner_join(expo_county, by = c("fips", "storm_id", "usa_atcf_id")) %>% 
+    select(fips, storm_id, lag, precip, precip_max)
+expo_wind   <- wind_Humberto2007 %>% inner_join(expo_county, by = c("fips", "storm_id", "usa_atcf_id")) %>% 
+    select(fips, storm_id, vmax_gust, vmax_sust, gust_dur, sust_dur)
+# 1053/9 # exactly 117 counties
+
+# prepare for variogram analysis(add county_name, latitude and longitude)
+expo_rain <- expo_rain %>% inner_join(county_center, by = "fips") %>% 
+  dplyr::select(fips, storm_id, county_name, state_name, latitude, longitude, lag, precip, precip_max)
+expo_wind <- expo_wind %>% inner_join(county_center, by = "fips") %>% 
+  dplyr::select(fips, storm_id, county_name, state_name, latitude, longitude, vmax_gust, vmax_sust, gust_dur, sust_dur)
+# the reason why we only choose exposure counties(closest distance < 160 kilometers) is written in ReadMe file
+```
+## variogram analysis
+the R package for geospatial statistic is geoR and the EDA tool for geospatial statistic is variogram
+the geoR package supports variogram estimation 
+
+
+
+
+
