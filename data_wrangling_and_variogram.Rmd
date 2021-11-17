@@ -154,6 +154,7 @@ ggplot(variog_rain_precip) +
   geom_point(aes(x = dist, y = gamma, color = dist)) + 
   geom_line(data = line_rain_precip, aes(x = dist, y = gamma), color = "red") + 
   ggtitle("Humberto-2007 Variogram -- Precipitation") + theme(legend.position = "none")
+
 # variogram of percip_max
 variog_rain_precip_max <- variogram(log(precip_max+1) ~ 1, data = expo_rain_mean, width = .03)
 fit_rain_precip_max    <- fit.variogram(variog_rain_precip_max, vgm(c(c("Exp", "Mat", "Sph"))))
