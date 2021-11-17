@@ -152,7 +152,8 @@ line_rain_precip <- variogramLine(vgm(psill = fit_rain_precip$psill[2], "Sph",
 ggplot(variog_rain_precip) + 
   geom_point(aes(x = dist, y = gamma, color = dist)) + 
   geom_line(data = line_rain_precip, aes(x = dist, y = gamma), color = "red") + 
-  ggtitle("Humberto-2007 Variogram -- Precipitation") + theme(legend.position = "none")
+  ggtitle("Humberto-2007 Variogram -- Precipitation") + theme_bw() + 
+  theme(legend.position = "none")
 
 # variogram of percip_max
 variog_rain_precip_max <- variogram(log(precip_max+1) ~ 1, data = expo_rain_mean, width = .03)
@@ -162,7 +163,8 @@ line_rain_precip_max <- variogramLine(vgm(psill = fit_rain_precip_max$psill[2], 
 ggplot(variog_rain_precip_max) + 
   geom_point(aes(x = dist, y = gamma, color = dist)) + 
   geom_line(data = line_rain_precip_max, aes(x = dist, y = gamma), color = "red") + 
-  ggtitle("Humberto-2007 Variogram -- Max Precipitation") + theme(legend.position = "none")
+  ggtitle("Humberto-2007 Variogram -- Max Precipitation") + theme_bw() + 
+  theme(legend.position = "none")
 ```
 ```{r}
 expo_wind_mean <- expo_wind
@@ -177,7 +179,8 @@ line_wind_gust <- variogramLine(vgm(psill = fit_wind_gust$psill[2], "Gau",
 plot_wind_gust <- ggplot(variog_wind_gust) + 
   geom_point(aes(x = dist, y = gamma, color = dist)) + 
   geom_line(data = line_wind_gust, aes(x = dist, y = gamma), color = "red") + 
-  ggtitle("Humberto-2007 Variogram -- Gust wind") + theme(legend.position = "none")
+  ggtitle("Humberto-2007 Variogram -- Gust wind") + theme_bw() + 
+  theme(legend.position = "none")
 
 # variogram: sustained wind
 variog_wind_sust <- variogram(log(vmax_sust+1) ~ 1, data = expo_wind_mean, width = .03)
@@ -188,7 +191,8 @@ line_wind_sust <- variogramLine(vgm(psill = fit_wind_sust$psill[2], "Gau",
 plot_wind_sust <- ggplot(variog_wind_sust) + 
   geom_point(aes(x = dist, y = gamma, color = dist)) + 
   geom_line(data = line_wind_sust, aes(x = dist, y = gamma), color = "red") + 
-  ggtitle("Humberto-2007 Variogram -- sustained wind") + theme(legend.position = "none")
+  ggtitle("Humberto-2007 Variogram -- sustained wind") + theme_bw() + 
+  theme(legend.position = "none")
 
 # variogram: gust wind duration
 variog_wind_gust_dur <- variogram(log(gust_dur+1) ~ 1, data = expo_wind_mean, width = .03)
@@ -199,7 +203,8 @@ line_wind_gust_dur <- variogramLine(vgm(psill = fit_wind_gust_dur$psill[2], "Gau
 plot_gust_dur <- ggplot(variog_wind_gust_dur) + 
   geom_point(aes(x = dist, y = gamma, color = dist)) + 
   geom_line(data = line_wind_gust_dur, aes(x = dist, y = gamma), color = "red") + 
-  ggtitle("Humberto-2007 Variogram -- gust wind duration") + theme(legend.position = "none")
+  ggtitle("Humberto-2007 Variogram -- gust wind duration") + theme_bw() + 
+  theme(legend.position = "none")
 
 # variogram: sustained wind duration
 variog_wind_sust_dur <- variogram(log(sust_dur+1) ~ 1, data = expo_wind_mean, width = .03)
@@ -210,7 +215,8 @@ line_wind_sust_dur <- variogramLine(vgm(psill = fit_wind_sust_dur$psill[2], "Gau
 plot_sust_dur <- ggplot(variog_wind_sust_dur) + 
   geom_point(aes(x = dist, y = gamma, color = dist)) + 
   geom_line(data = line_wind_sust_dur, aes(x = dist, y = gamma), color = "red") + 
-  ggtitle("Humberto-2007 Variogram -- sustained wind duration") + theme(legend.position = "none")
+  ggtitle("Humberto-2007 Variogram -- sustained wind duration") + theme_bw() + 
+  theme(legend.position = "none")
 
 grid.arrange(plot_wind_gust, plot_wind_sust, plot_gust_dur, plot_sust_dur)
 
