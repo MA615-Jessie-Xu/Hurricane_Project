@@ -18,7 +18,6 @@ library(gstat)
 library(sp)
 library(sf)
 library(rgdal)
-library(OSMscale)
 library(OpenStreetMap)
 ```
 
