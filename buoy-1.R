@@ -33,8 +33,8 @@ for (i in 1:N){
   )
    file$date_time <- make_datetime(year = 2007, month = as.integer(file$MM), day = as.integer(file$DD), hour = as.integer(file$hh), min = as.integer(file$mm))
   
-   file <- file[file$date_time>"2007-09-11 19:0:00 EST",]
-   file <- file[file$date_time<"2007-09-13 21:0:00 EST",]
+   file <- file[file$date_time>"2007-09-06 0:0:00 EST",]
+   file <- file[file$date_time<"2007-09-18 23:0:00 EST",]
    file <- file[!is.na(file$`#YY`),]
   
  #file <- subset(file, MM=="09" & DD=="12" & DD=="13")
@@ -62,3 +62,4 @@ for (i in 1:N){
     dt <- rbind.data.frame(dt, file)
   }
 }
+
