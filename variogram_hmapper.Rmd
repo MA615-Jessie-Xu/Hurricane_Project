@@ -14,17 +14,18 @@ library(hurricaneexposure)
 library(weathermetrics)
 library(geoR)
 library(dplyr)
-install.packages("OSMscale")
 library(OSMscale)
+library(sp)
+library(tmap)
+library(gstat)
 ```
 
 ## convert latitude & longitude to 2D distance
 ```{r}
-latlongtProjection <- projectPoints(latitude, longitude, expo_wind)
-latlongtProjection$fips <- expo_wind$fips
-latlongtProjection$storm_id <- expo_wind$storm_id
-expo_wind_new <- merge(expo_wind,latlongtProjection,by=c("fips","storm_id"))
-#dists <- dist(expo_wind_new[,11:12])
+# latlongtProjection <- projectPoints(latitude, longitude, expo_wind)
+# latlongtProjection$fips <- expo_wind$fips
+# latlongtProjection$storm_id <- expo_wind$storm_id
+# expo_wind_new <- merge(expo_wind,latlongtProjection,by=c("fips","storm_id"))
 ```
 From package "OSMscale".
 
@@ -35,11 +36,9 @@ Link: https://cran.r-project.org/web/packages/OSMscale/OSMscale.pdf
 
 ## variogram
 ```{r}
-coordinates(expo_wind_new) <- ~ x + y
-v_windVmaxGust <- variogram(vmax_gust~1, expo_wind_new) ##dataset becomes small, why?
-
+coordinates(expo_wind) <- ~ latitude + longitude
+v_windVmaxGust <- variogram(vmax_gust~1, expo_wind, width=0.01) 
 ggplot(v_windVmaxGust)+
   geom_point(aes(x=dist,y=gamma))
-v_windVmaxGust_fit <- fit.variogram(v_windVmaxGust, vgm("Sph", 700))
 ```
 
