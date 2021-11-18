@@ -1,0 +1,112 @@
+---
+title: "Maping by ggplot"
+author: "Jessie Xu"
+date: "2021/11/17"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(drat)
+library(hurricaneexposuredata)
+library(hurricaneexposure)
+library(weathermetrics)
+library(geoR)
+library(dplyr)
+library(gstat)
+library(gridExtra)
+```
+
+```{r}
+addRepo("geanders")
+hurr_tracks <- hurricaneexposuredata::hurr_tracks
+hurr_Humberto2007         <- hurricaneexposuredata::hurr_tracks %>% subset(storm_id == "Humberto-2007")
+rain_Humberto2007         <- hurricaneexposuredata::rain %>% subset(storm_id == "Humberto-2007")
+wind_Humberto2007         <- hurricaneexposuredata::storm_winds %>% subset(storm_id == "Humberto-2007")
+closest_dist_Humberto2007 <- hurricaneexposuredata::closest_dist %>% subset(storm_id == "Humberto-2007")
+
+
+# prepare data for ploting rainfall 
+library(magrittr)
+rain_Humberto2007 %<>% 
+  group_by(fips) %>% 
+  summarize(precip = sum(precip), precip_max = sum(precip_max),.groups = "keep")%>%
+  mutate(`Rainfall(mm)` = cut(precip, 
+                     breaks = c(0, 25, 50, 75, 100, 125, 150),
+                     include.lowest = TRUE))%>%
+  mutate(fips = as.numeric(fips)) # prepare for left_join
+# rain_Humberto2007 <- na.omit(rain_Humberto2007) # check: no NA
+
+# provide state(region) and county(subregion) based on fips
+county.fips <- maps::county.fips
+rain_Humberto2007 <- left_join(rain_Humberto2007, county.fips, by = "fips")
+rain_Humberto2007 %<>% 
+  separate(polyname, c("region", "subregion"), sep = ",")
+# provide longitude and latitude 
+# unique(rain_Humberto2007$state)
+region <- c("alabama", "arkansas", "connecticut", "delaware", "district of columbia",
+                "florida","georgia", "illinois", "indiana","iowa", 
+                "kansas", "kentucky", "louisiana","maine", "maryland",
+                "massachusetts", "michigan", "mississippi", "missouri","new hampshire", 
+                "new jersey", "new york", "north carolina", "ohio", "oklahoma", 
+                "pennsylvania", "rhode island", "south carolina","tennessee", "texas",
+                "vermont","virginia", "west virginia", "wisconsin")  
+counties <- map_data(map = "county", region = region)
+state    <- map_data(map = "state", region = region)
+rain_Humberto2007 <- left_join(rain_Humberto2007, counties, 
+                               by = c("region", "subregion"))
+
+```
+
+```{r}
+# plot rainfall
+plot_rainfall <-
+  ggplot() + 
+  geom_polygon(data = rain_Humberto2007, 
+               aes(x = long, y = lat, group = group,fill = `Rainfall(mm)`), 
+               color = "grey", size = 0.2, alpha = 1.6) + 
+  geom_polygon(data = state, aes(x = long, y = lat, group = group),
+               color="black", fill="white", size = 0.2, alpha = 0.3) +
+  geom_path(aes(x = hurr_Humberto2007$longitude, y = hurr_Humberto2007$latitude), color = "red4") +
+  scale_fill_brewer(palette = "Blues") +
+  ggtitle("Humberto-2007") +
+  theme(plot.title=element_text(hjust=0.5),
+        panel.background=element_blank(),
+        panel.border=element_blank(),
+        axis.title=element_blank(),
+        axis.text=element_blank(),
+        axis.ticks=element_blank())
+# 42019 Location: 27.910N 95.345W
+# 42035 Location: 29.232N 94.413W
+# SRST2 Location: 29.683N 94.033W
+
+y <- c(27.910, 29.232, 29.683) 
+x <- c(-95.345, -94.413, -94.033)
+bouys_location <- data.frame(x,y)
+
+plot_rainfall <- 
+  plot_rainfall+
+  geom_point(data = bouys_location, aes(x=x,y=y), size = 2, shape = 23,  fill = "yellow")
+plot_rainfall
+
+# plot exposure
+rain_Humberto2007$scale <- cut(rain_Humberto2007$precip,c(-1,100,500),c("Unexposed","Exposed"),ordered_result = T)
+plot_exposure <- 
+  ggplot()+
+  geom_polygon(data = rain_Humberto2007, 
+               aes(x = long, y = lat, group = group, fill = scale), 
+               color = "grey", size = 0.2, alpha = 1.6) + 
+  geom_polygon(data = state, aes(x = long, y = lat, group = group),
+               color="black", fill="white", size = 0.2, alpha = 0.3) +
+  geom_path(aes(x = hurr_Humberto2007$longitude, y = hurr_Humberto2007$latitude), color = "red4") +
+  ggtitle("Humberto-2007") +
+  theme(plot.title=element_text(hjust=0.5),
+        panel.background=element_blank(),
+        panel.border=element_blank(),
+        axis.title=element_blank(),
+        axis.text=element_blank(),
+        axis.ticks=element_blank())+
+  scale_fill_manual("Rain > 100 mm",values=c("white","darkblue"))
+plot_exposure
+```
