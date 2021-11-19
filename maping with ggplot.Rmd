@@ -110,3 +110,114 @@ plot_exposure <-
   scale_fill_manual("Rain > 100 mm",values=c("white","darkblue"))
 plot_exposure
 ```
+
+```{r}
+plot1 <- plot_Humberto2007$rmap
+plot2 <- plot_Humberto2007$wmap
+plot3 <- plot_Humberto2007$expos
+
+plot1 +geom_point(data = bouys_location, aes(x=x,y=y), size = 2, shape = 23,  fill = "yellow")
+
+# 42019 Location: 27.910N 95.345W
+# 42035 Location: 29.232N 94.413W
+# SRST2 Location: 29.683N 94.033W
+
+# WSPD
+# summarise daily data(buoy_42019)
+raw_42019   <- dt_42019 %>% select(date_time, WSPD) %>% 
+  add_column(buoy = rep("buoy_42019", length(dt_42019$date_time)), .after = 0)
+colnames(raw_42019)[3] <- c("average_wind_speed(hourly)")
+raw_42019$`average_wind_speed(hourly)` <- as.numeric(raw_42019$`average_wind_speed(hourly)`)
+
+daily_42019 <- dt_42019
+daily_42019$date_time <- as.Date(daily_42019$date_time)
+daily_42019$WSPD      <- as.numeric(daily_42019$WSPD)
+daily_42019 <- daily_42019 %>% 
+  select(WSPD, date_time) %>% group_by(date_time) %>% 
+  summarise(wind_speed = mean(WSPD)) %>% add_column(buoy = rep("buoy_42019", 14), .after = 0)
+
+# summarise daily data(buoy_42035)
+raw_42035   <- dt_42035 %>% select(date_time, WSPD) %>% 
+  add_column(buoy = rep("buoy_42035", length(dt_42035$date_time)), .after = 0)
+colnames(raw_42035)[3] <- c("average_wind_speed(hourly)")
+raw_42035$`average_wind_speed(hourly)` <- as.numeric(raw_42035$`average_wind_speed(hourly)`)
+
+daily_42035 <- dt_42035
+daily_42035$date_time <- as.Date(daily_42035$date_time)
+daily_42035$WSPD      <- as.numeric(daily_42035$WSPD)
+daily_42035 <- daily_42035 %>% 
+  select(WSPD, date_time) %>% group_by(date_time) %>% 
+  summarise(wind_speed = mean(WSPD)) %>% add_column(buoy = rep("buoy_42035", 14), .after = 0)
+
+# summarise daily data(buoy_srst2)
+raw_srst2   <- dt_srst2 %>% select(date_time, WSPD) %>% 
+  add_column(buoy = rep("buoy_srst2", length(dt_srst2$date_time)), .after = 0)
+colnames(raw_srst2)[3] <- c("average_wind_speed(hourly)")
+raw_srst2$`average_wind_speed(hourly)` <- as.numeric(raw_srst2$`average_wind_speed(hourly)`)
+
+daily_srst2 <- dt_srst2
+daily_srst2$date_time <- as.Date(daily_srst2$date_time)
+daily_srst2$WSPD      <- as.numeric(daily_srst2$WSPD)
+daily_srst2 <- daily_srst2 %>% 
+  select(WSPD, date_time) %>% group_by(date_time) %>% 
+  summarise(wind_speed = mean(WSPD)) %>% add_column(buoy = rep("buoy_srst2", 14), .after = 0)
+
+
+# put them into one Dataframee
+buoy_raw <- rbind(raw_42019, raw_42035, raw_srst2)
+buoy_location <- data.frame(buoy = unique(buoy_daily$buoy), 
+                            latitude  = bouys_location$x, 
+                            longitude = bouys_location$y)
+buoy_raw <- buoy_raw %>% inner_join(buoy_location, by = "buoy")
+buoy_daily <- rbind(daily_42019, daily_42035, daily_srst2)
+buoy_daily <- buoy_daily %>% inner_join(buoy_location, by = "buoy")
+
+buoy_daily_0906 <- buoy_daily %>% subset(date_time == "2007-09-06")
+# unique(buoy_daily$date_time)
+# plot1 +geom_point(data = bouys_location, aes(x=x,y=y), size = 2, shape = 23,  fill = "yellow")
+plot2 +geom_point(data = buoy_daily_0906, aes(x = latitude,y = longitude),  size = 2, shape = 23,  fill = "yellow")
+
+
+
+
+
+
+ui_1 <- fluidPage(
+  selectInput("date", "select the date", c("2007-09-06", "2007-09-07", "2007-09-08", "2007-09-09", 
+                                           "2007-09-10", "2007-09-11", "2007-09-12", "2007-09-13", 
+                                           "2007-09-14", "2007-09-15", "2007-09-16", "2007-09-17", 
+                                           "2007-09-18", "2007-09-19")),
+  selectInput("buoy", "select state", unique(df$State)),
+  plotOutput("plot", brush = "plot_brush"),
+  # tableOutput("data")
+  plotOutput("plot")
+)
+server_1 <- function(input, output, session) {
+  output$plot <- renderPlot({
+    ggplot(data = subset(df, chemical.type == input$chemical.type & State == input$State),
+           mapping = aes(x = Year, y = Value, color = chemical)) + 
+      geom_point()
+    }, res = 96)
+  
+  output$data <- renderTable({
+    brushedPoints(subset(df, chemical.type == input$chemical.type & State == input$State), input$plot_brush)
+  })
+}
+
+shinyApp(ui_1, server_1)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```
