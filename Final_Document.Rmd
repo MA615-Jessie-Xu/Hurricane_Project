@@ -45,6 +45,7 @@ closest_dist_Humberto2007 <- hurricaneexposuredata::closest_dist %>% subset(stor
 y <- c(27.910, 29.232, 29.683) 
 x <- c(-95.345, -94.413, -94.033)
 bouys_location <- data.frame(x,y)
+
 ```
 
 ```{r}
@@ -62,6 +63,9 @@ region <- c("Arkansas","Louisiana", "Mississippi", "Texas")
 #                 "pennsylvania", "rhode island", "south carolina","tennessee", "texas",
 #                 "vermont","virginia", "west virginia", "wisconsin")  
 state    <- map_data(map = "state", region = region)
+state_text <- state %>%
+  group_by(region) %>% 
+  summarize(long = mean(long), lat = mean(lat), .groups = "keep")
 # plot track and buoy
 track <-
   ggplot() + 
@@ -69,6 +73,7 @@ track <-
                color="black", fill="white", size = 0.2, alpha = 0.3) +
   geom_path(aes(x = hurr_Humberto2007$longitude, y = hurr_Humberto2007$latitude), color = "red4") +
   geom_point(data = bouys_location, aes(x=x,y=y), size = 2, shape = 23,  fill = "yellow")+
+  geom_text(aes(x = long, y = lat, label = region), data = state_text, size = 6)+
   ggtitle("Humberto-2007") +
   theme(plot.title=element_text(hjust=0.5),
         panel.background=element_blank(),
@@ -283,7 +288,7 @@ We generated plots from buoys 42019, 42035, and SRST2, which were significantly 
 
 Here is the date and time when Hurricane Humberto was closest to each buoy. 
 
-(Insert Buoy_location 那个df)
+(Insert Buoy_location df)
 ```{r}
 # insert buoys data
 library(tidyverse)
@@ -372,6 +377,7 @@ buoy_location$closest_date[1] <- hurr_Humberto2007$date[which(hurr_Humberto2007$
 buoy_location$closest_date[2] <- hurr_Humberto2007$date[which(hurr_Humberto2007$dist_42035 == min(hurr_Humberto2007$dist_42035))] 
 buoy_location$closest_date[3] <- hurr_Humberto2007$date[which(hurr_Humberto2007$dist_srst2 == min(hurr_Humberto2007$dist_srst2))] 
 buoy_location$closest_date <- lubridate::ymd_hm(buoy_location$closest_date)
+buoy_location
 ```
 
 + Time series
