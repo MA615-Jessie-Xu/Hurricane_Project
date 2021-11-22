@@ -69,6 +69,7 @@ track <-
                color="black", fill="white", size = 0.2, alpha = 0.3) +
   geom_path(aes(x = hurr_Humberto2007$longitude, y = hurr_Humberto2007$latitude), color = "red4") +
   geom_point(data = bouys_location, aes(x=x,y=y), size = 2, shape = 23,  fill = "yellow")+
+  #geom_text(aes(x=31,y=-99,label="Texas")+
   ggtitle("Humberto-2007") +
   theme(plot.title=element_text(hjust=0.5),
         panel.background=element_blank(),
@@ -372,6 +373,7 @@ buoy_location$closest_date[1] <- hurr_Humberto2007$date[which(hurr_Humberto2007$
 buoy_location$closest_date[2] <- hurr_Humberto2007$date[which(hurr_Humberto2007$dist_42035 == min(hurr_Humberto2007$dist_42035))] 
 buoy_location$closest_date[3] <- hurr_Humberto2007$date[which(hurr_Humberto2007$dist_srst2 == min(hurr_Humberto2007$dist_srst2))] 
 buoy_location$closest_date <- lubridate::ymd_hm(buoy_location$closest_date)
+buoy_location
 ```
 
 + Time series
