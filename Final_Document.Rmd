@@ -290,7 +290,7 @@ We generated plots from buoys 42019, 42035, and SRST2, which were significantly 
 
 Here is the date and time when Hurricane Humberto was closest to each buoy. 
 
-(Insert Buoy_location 那个df)
+(Insert Buoy_location df)
 ```{r}
 # insert buoys data
 library(tidyverse)
