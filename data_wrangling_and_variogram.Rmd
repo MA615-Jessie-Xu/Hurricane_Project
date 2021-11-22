@@ -83,7 +83,7 @@ plot_Humberto2007$expos
 
 ```{r}
 hurr = "Humberto-2007"
-# set dist_limit = 500 to define exposure. 
+# set dist_limit = 160 to define exposure. 
 map_rain_exposure(storm = hurr, 
       rain_limit = 0, 
       dist_limit = 160, 
