@@ -133,14 +133,14 @@ raw_42019   <- dt_42019 %>% select(date_time, WSPD) %>%
 colnames(raw_42019)[3] <- c("average_wind_speed")
 raw_42019$average_wind_speed <- as.numeric(raw_42019$average_wind_speed)
 
-# summarise daily data(buoy_42035)
+
 raw_42035   <- dt_42035 %>% select(date_time, WSPD) %>% 
   add_column(buoy = rep("buoy_42035", length(dt_42035$date_time)), .after = 0)
 colnames(raw_42035)[3] <- c("average_wind_speed")
 raw_42035$average_wind_speed <- as.numeric(raw_42035$average_wind_speed)
 
 
-# summarise daily data(buoy_srst2)
+
 raw_srst2   <- dt_srst2 %>% select(date_time, WSPD) %>% 
   add_column(buoy = rep("buoy_srst2", length(dt_srst2$date_time)), .after = 0)
 colnames(raw_srst2)[3] <- c("average_wind_speed")
@@ -149,7 +149,7 @@ raw_srst2$average_wind_speed <- as.numeric(raw_srst2$average_wind_speed )
 
 # put them into one Dataframee
 buoy_raw <- rbind(raw_42019, raw_42035, raw_srst2)
-buoy_location <- data.frame(buoy = unique(buoy_daily$buoy), 
+buoy_location <- data.frame(buoy = unique(buoy_raw$buoy), 
                             longitude  = bouys_location$x, 
                             latitude   = bouys_location$y)
 buoy_raw <- buoy_raw %>% inner_join(buoy_location, by = "buoy")
