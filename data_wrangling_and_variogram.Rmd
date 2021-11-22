@@ -179,7 +179,7 @@ line_wind_gust <- variogramLine(vgm(psill = fit_wind_gust$psill[2], "Gau",
 plot_wind_gust <- ggplot(variog_wind_gust) + 
   geom_point(aes(x = dist, y = gamma, color = dist)) + 
   geom_line(data = line_wind_gust, aes(x = dist, y = gamma), color = "red") + 
-  ggtitle("Humberto-2007 Variogram -- Gust wind") + theme_bw() + w
+  ggtitle("Humberto-2007 Variogram -- Gust wind") + theme_bw() + 
   theme(legend.position = "none")
 
 # variogram: sustained wind
