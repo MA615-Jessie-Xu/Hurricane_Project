@@ -47,19 +47,3 @@ for (i in 1:N){
   file <- get(filenames[i])
   assign(filenames[i],file[,c(1:4,6:19)])
 }
-
-
-# combine the df and unify the column name
-for (i in 1:N){
-  file <- get(filenames[i])
-  
-  colnames(file) <- c("YYYY", "MM", "DD", "hh", "WD", "WSPD", "GST", "WVHT", "DPD", "APD", "MWD", "BAR", "ATMP", "WTMP", "DEWP", "VIS", "TIDE", "date_time")
-  
-  if(i==1){
-    dt <- file
-  }
-  else{
-    dt <- rbind.data.frame(dt, file)
-  }
-}
-
