@@ -83,14 +83,14 @@ plot_Humberto2007$expos
 
 ```{r}
 hurr = "Humberto-2007"
-# set dist_limit = 500 to define exposure. 
+# set dist_limit = 160 to define exposure. 
 map_rain_exposure(storm = hurr, 
       rain_limit = 0, 
       dist_limit = 160, 
       days_included =-5:3) +
         ggtitle(hurr) +
         theme(plot.title = element_text(hjust = 0.5))
-# distance visualizaiton 
+# distance visualization 
 map_counties(storm = hurr, 
              metric = "distance", 
              add_track = TRUE) 
@@ -144,7 +144,7 @@ expo_rain_mean <- expo_rain %>% group_by(fips) %>%
   inner_join(rain_county, by = "fips")
 coordinates(expo_rain_mean) <- ~ latitude + longitude
 
-# variogram of percip
+# variogram of precip
 variog_rain_precip <- variogram(log(precip+1) ~ 1, data = expo_rain_mean, width = .03)
 fit_rain_precip    <- fit.variogram(variog_rain_precip, vgm(c(c("Exp", "Mat", "Sph"))))
 line_rain_precip <- variogramLine(vgm(psill = fit_rain_precip$psill[2], "Sph", 
@@ -155,7 +155,7 @@ ggplot(variog_rain_precip) +
   ggtitle("Humberto-2007 Variogram -- Precipitation") + theme_bw() + 
   theme(legend.position = "none")
 
-# variogram of percip_max
+# variogram of precip_max
 variog_rain_precip_max <- variogram(log(precip_max+1) ~ 1, data = expo_rain_mean, width = .03)
 fit_rain_precip_max    <- fit.variogram(variog_rain_precip_max, vgm(c(c("Exp", "Mat", "Sph"))))
 line_rain_precip_max <- variogramLine(vgm(psill = fit_rain_precip_max$psill[2], "Sph", 

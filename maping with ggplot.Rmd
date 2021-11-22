@@ -128,6 +128,8 @@ plot3 <- plot_Humberto2007$expos
 # SRST2 Location: 29.683N 94.033W
 
 # WSPD
+
+#source(file = "buoy-1.R", echo = FALSE)
 raw_42019   <- dt_42019 %>% select(date_time, WSPD) %>% 
   add_column(buoy = rep("buoy_42019", length(dt_42019$date_time)), .after = 0)
 colnames(raw_42019)[3] <- c("average_wind_speed")
@@ -154,7 +156,7 @@ buoy_location <- data.frame(buoy = unique(buoy_raw$buoy),
                             latitude   = bouys_location$y)
 buoy_raw <- buoy_raw %>% inner_join(buoy_location, by = "buoy")
 
-# unique(buoy_daily$date_time)
+# unique(buoy_raw$date_time)
 # plot1 +geom_point(data = bouys_location, aes(x=x,y=y), size = 2, shape = 23,  fill = "yellow")
 # plot1 +geom_point(data = unique(select(buoy_raw, buoy, longitude, latitude)), aes(x = longitude,y = latitude),  size = 2, shape = 23,  fill = "yellow")
 ```
