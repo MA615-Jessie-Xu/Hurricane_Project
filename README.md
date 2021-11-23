@@ -8,11 +8,11 @@ Buoy-1.R
 
  + This file is to import and clean the buoys' data.
 
-Data_wrangling and variogram.rmd
+Data_wrangling_and_variogram.Rmd
 
  + This file included maps from Hurricane Exposure package and spatial analysis.
  
-Mapping with ggplot.rmd
+Mapping with ggplot.Rmd
 
  + This file created to import buoys' cleaned data and do EDA.
 
