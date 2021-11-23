@@ -3,6 +3,7 @@ title: "Final Document"
 author: "Yifan Zhang, Xiang Li, Shuting Li, Ranfei Xu"
 date: "2021/11/22"
 output: pdf_document
+latex_engine: xelatex
 ---
 
 ```{r setup, include=FALSE, warning=FALSE, message=FALSE}
@@ -22,6 +23,7 @@ library(shiny)
 library(maps)
 library(geosphere)
 library(sp)
+Sys.setenv(LANGUAGE = "en")
 ```
 
 # Introduction
@@ -312,11 +314,7 @@ url1 <-  "https://www.ndbc.noaa.gov/view_text_file.php?filename="
 url2 <- ".txt.gz&dir=data/historical/stdmet/"
 urls <- str_c(url1,buoys_id, "h2007", url2, sep = "")
 filenames <- str_c("dt_", buoys_id, sep = "")
-year = 2007
-month = as.integer(file$MM)
-day = as.integer(file$DD)
-hour = as.integer(file$hh)
-min = as.integer(file$mm)
+
 N <- length(urls)
 
 for (i in 1:N){
@@ -400,25 +398,25 @@ buoy_location$closest_date[2] <- hurr_Humberto2007$date[which(hurr_Humberto2007$
 buoy_location$closest_date[3] <- hurr_Humberto2007$date[which(hurr_Humberto2007$dist_srst2 == min(hurr_Humberto2007$dist_srst2))] 
 buoy_location$closest_date <- lubridate::ymd_hm(buoy_location$closest_date)
 
-ggplot(subset(buoy_raw, buoy == "buoy_42019"), aes(x = date_time, y = average_wind_speed)) + 
-  geom_line() + 
-  geom_rect(aes(xmin=(buoy_location$closest_date[1] - 1*60*60*24), 
+ggplot(subset(buoy_raw, buoy == "buoy_42019"), aes(x = date_time, y = average_wind_speed)) +
+  geom_line() +
+  geom_rect(aes(xmin=(buoy_location$closest_date[1] - 1*60*60*24),
                 xmax=(buoy_location$closest_date[1] + 1*60*60*24),
-                ymin=0, ymax=Inf), alpha = .01, fill = "#9898fb") + 
+                ymin=0, ymax=Inf), alpha = .01, fill = "#9898fb") +
   xlab("Time") + ylab("Average wind speed(hourly)") + theme_bw()
 
-ggplot(subset(buoy_raw, buoy == "buoy_42035"), aes(x = date_time, y = average_wind_speed)) + 
-  geom_line() + 
-  geom_rect(aes(xmin=(buoy_location$closest_date[2] - 1*60*60*24), 
+ggplot(subset(buoy_raw, buoy == "buoy_42035"), aes(x = date_time, y = average_wind_speed)) +
+  geom_line() +
+  geom_rect(aes(xmin=(buoy_location$closest_date[2] - 1*60*60*24),
                 xmax=(buoy_location$closest_date[2] + 1*60*60*24),
-                ymin=0, ymax=Inf), alpha = .01, fill = "#9898fb") + 
+                ymin=0, ymax=Inf), alpha = .01, fill = "#9898fb") +
   xlab("Time") + ylab("Average wind speed(hourly)") + theme_bw()
 
-ggplot(subset(buoy_raw, buoy == "buoy_srst2"), aes(x = date_time, y = average_wind_speed)) + 
-  geom_line() + 
-  geom_rect(aes(xmin=(buoy_location$closest_date[3] - 1*60*60*24), 
+ggplot(subset(buoy_raw, buoy == "buoy_srst2"), aes(x = date_time, y = average_wind_speed)) +
+  geom_line() +
+  geom_rect(aes(xmin=(buoy_location$closest_date[3] - 1*60*60*24),
                 xmax=(buoy_location$closest_date[3] + 1*60*60*24),
-                ymin=0, ymax=Inf), alpha = .01, fill = "#9898fb") + 
+                ymin=0, ymax=Inf), alpha = .01, fill = "#9898fb") +
   xlab("Time") + ylab("Average wind speed(hourly)") + theme_bw()
 ```
 
@@ -427,9 +425,11 @@ From these figures, we can see that the wind speed at each of the three buoys ha
 
 ### Citation
 https://www.weather.gov/hgx/projects_humberto07
+
 https://earthobservatory.nasa.gov/images/19056/hurricane-humberto
-.(https://www.directenergy.com/learning-center/hurricane)
+
 https://www.directenergy.com/learning-center/hurricane
+
 https://www.nhc.noaa.gov/data/tcr/AL092007_Humberto.pdf
 
 
