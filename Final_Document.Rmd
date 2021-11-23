@@ -2,8 +2,9 @@
 title: "Final Document"
 author: "Yifan Zhang, Xiang Li, Shuting Li, Ranfei Xu"
 date: "2021/11/22"
-output: pdf_document
-latex_engine: xelatex
+output:
+  pdf_document:
+    latex_engine: xelatex
 ---
 
 ```{r setup, include=FALSE, warning=FALSE, message=FALSE}
@@ -19,7 +20,6 @@ library(gstat)
 library(gridExtra)
 library(dplyr)
 library(magrittr)
-library(shiny)
 library(maps)
 library(geosphere)
 library(sp)
@@ -28,9 +28,9 @@ Sys.setenv(LANGUAGE = "en")
 
 # Introduction
 
-__Hurricane Humberto__ is a tropical storm on September 12, 2007. Humberto is the first hurricane to make landfall in the United States since Wilma struck South Florida in October 2005 and the first hurricane to make landfall along the Texas coast since Rita struck the Texas-Louisiana area in September 2005. In this report, we are going to map Humberto's weather effect and compare  …..using buoy’s data from National Data Buoy Center.
+__Hurricane Humberto__ is a tropical storm on September 12, 2007. Humberto is the first hurricane to make landfall in the United States since Wilma struck South Florida in October 2005 and the first hurricane to make landfall along the Texas coast since Rita struck the Texas-Louisiana area in September 2005. In this report, we are going to map Humberto's weather effect and compare average wind speed by using buoy’s data from National Data Buoy Center.
 
-# Plotting storm tracks with ggplot （Insert image of the hurricane track with buoys）
+## Plotting Storm Tracks and Selected Buoys
 ```{r}
 # data preparation
 addRepo("geanders")
@@ -86,7 +86,7 @@ track <-
 track
 ```
 
-
+\newpage
 # Maps for Hurricane Humberto from “Hurricane Exposure” Package
 
 We generated maps of __Hurricane Humberto-2007__ from the “Hurricane Exposure” package, which included rain maps, wind speed, and duration maps for sustained wind and wind gusts.
@@ -100,13 +100,13 @@ Here is the difference between sustained wind and wind gusts
 
 On average, the diameter of hurricane-force winds is about 100 miles (160 kilometers). Slower speed winds further out from the storm center increase the storm system's diameter on average 300 to 400 miles across. And the eye of the hurricane is 30 miles in diameter. Therefore, we only choose exposure counties, which are 117 counties in total.
 
-（Insert hurricane exposure package image）
-```{r}
+
+```{r,warning=FALSE,message=FALSE}
 # function
 hmapper <- function(hurr){
     
     rmap = map_counties(storm = hurr, metric = "rainfall") +
-            ggtitle(hurr) +
+            ggtitle("Rainfall") +
             theme(plot.title = element_text(hjust = 0.5))
 
     wmap = map_counties(storm = hurr, metric = "wind") +
@@ -132,45 +132,55 @@ county_center <- hurricaneexposuredata::county_centers
 # plot
 plot_Humberto2007 <- hmapper("Humberto-2007")
 plot_Humberto2007$rmap
-plot_Humberto2007$wmap
-plot_Humberto2007$expos
+
+hurr = "Humberto-2007"
+# set dist_limit = 160 to define exposure.
+map_rain_exposure(storm = hurr,
+      rain_limit = 0,
+      dist_limit = 160,
+      days_included =-5:3) +
+        ggtitle("Counties Exposed by Rain") +
+        theme(plot.title = element_text(hjust = 0.5))
+# distance visualization
+map_counties(storm = hurr,
+             metric = "distance",
+             add_track = TRUE)+
+             ggtitle("Distance")+
+             theme(plot.title = element_text(hjust = 0.5))
+
+m1 <- map_counties(storm = hurr, 
+             metric = "wind",
+             wind_var = "vmax_sust", 
+             add_track = TRUE)+
+  ggtitle("Wind vmax_sust")
+m2 <- map_counties(storm = hurr, 
+             metric = "wind",
+             wind_var = "vmax_gust", 
+             add_track = TRUE) +
+   ggtitle("Wind vmax_gust")
+m3 <- map_counties(storm = hurr, 
+             metric = "wind",
+             wind_var = "sust_dur", 
+             add_track = TRUE)+
+   ggtitle("Wind sust_dur")
+m4 <- map_counties(storm = hurr, 
+             metric = "wind",
+             wind_var = "gust_dur", 
+             add_track = TRUE)+
+     ggtitle("Wind gust_dur")
+grid.arrange(m1,m2,ncol=2)
+grid.arrange(m3,m4,ncol=2)
 ```
 
+
+\newpage
 # Spatial Analysis
 
 Here are the variogram analysis generated from the “Hurricane Exposure” Package
 
-(Insert hurricane exposure package image）-Rain
-```{r}
-hurr = "Humberto-2007"
-# # set dist_limit = 160 to define exposure. 
-# map_rain_exposure(storm = hurr, 
-#       rain_limit = 0, 
-#       dist_limit = 160, 
-#       days_included =-5:3) +
-#         ggtitle(hurr) +
-#         theme(plot.title = element_text(hjust = 0.5))
-# # distance visualization 
-# map_counties(storm = hurr, 
-#              metric = "distance", 
-#              add_track = TRUE) 
-m1 <- map_counties(storm = hurr, 
-             metric = "wind",
-             wind_var = "vmax_sust", 
-             add_track = TRUE) 
-m2 <- map_counties(storm = hurr, 
-             metric = "wind",
-             wind_var = "vmax_gust", 
-             add_track = TRUE) 
-m3 <- map_counties(storm = hurr, 
-             metric = "wind",
-             wind_var = "sust_dur", 
-             add_track = TRUE) 
-m4 <- map_counties(storm = hurr, 
-             metric = "wind",
-             wind_var = "gust_dur", 
-             add_track = TRUE) 
++ Rain
 
+```{r}
 # subset rain and wind data to these 117 counties
 expo_county <- closest_dist_Humberto2007 %>% subset(storm_dist < 160) # filter 117 exposure counties 
 expo_rain   <- rain_Humberto2007 %>% inner_join(expo_county, by = c("fips", "storm_id", "usa_atcf_id")) %>% 
@@ -202,7 +212,7 @@ line_rain_precip <- variogramLine(vgm(psill = fit_rain_precip$psill[2], "Sph",
 v1 <- ggplot(variog_rain_precip) + 
   geom_point(aes(x = dist, y = gamma, color = dist)) + 
   geom_line(data = line_rain_precip, aes(x = dist, y = gamma), color = "red") + 
-  ggtitle("Humberto-2007 Variogram -- Precipitation") + theme_bw() + 
+  ggtitle("Variogram -- Precipitation") + theme_bw() + 
   theme(legend.position = "none")
 
 # variogram of precip_max
@@ -213,16 +223,18 @@ line_rain_precip_max <- variogramLine(vgm(psill = fit_rain_precip_max$psill[2], 
 v2 <- ggplot(variog_rain_precip_max) + 
   geom_point(aes(x = dist, y = gamma, color = dist)) + 
   geom_line(data = line_rain_precip_max, aes(x = dist, y = gamma), color = "red") + 
-  ggtitle("Humberto-2007 Variogram -- Max Precipitation") + theme_bw() + 
+  ggtitle("Variogram -- Max Precipitation") + theme_bw() + 
   theme(legend.position = "none")
 grid.arrange(v1,v2,ncol=2)
 ```
 
 
-+ Variogram interpretation:
+Variogram interpretation:
+
 Among 117 counties, the correlation between rain __Precipitation__ and the correlation between __Max-Precipitation__ are increasing as the distance between two random counties is increasing.
 
-(Insert hurricane exposure package image）-wind
++ Wind
+
 ```{r}
 expo_wind_mean <- expo_wind
 coordinates(expo_wind_mean) <- ~ latitude + longitude
@@ -236,7 +248,7 @@ line_wind_gust <- variogramLine(vgm(psill = fit_wind_gust$psill[2], "Gau",
 plot_wind_gust <- ggplot(variog_wind_gust) + 
   geom_point(aes(x = dist, y = gamma, color = dist)) + 
   geom_line(data = line_wind_gust, aes(x = dist, y = gamma), color = "red") + 
-  ggtitle("Humberto-2007 Variogram -- Gust wind") + theme_bw() + 
+  ggtitle("Variogram -- Gust wind") + theme_bw() + 
   theme(legend.position = "none")
 
 # variogram: sustained wind
@@ -248,7 +260,7 @@ line_wind_sust <- variogramLine(vgm(psill = fit_wind_sust$psill[2], "Gau",
 plot_wind_sust <- ggplot(variog_wind_sust) + 
   geom_point(aes(x = dist, y = gamma, color = dist)) + 
   geom_line(data = line_wind_sust, aes(x = dist, y = gamma), color = "red") + 
-  ggtitle("Humberto-2007 Variogram -- sustained wind") + theme_bw() + 
+  ggtitle("Variogram -- sustained wind") + theme_bw() + 
   theme(legend.position = "none")
 
 # variogram: gust wind duration
@@ -260,7 +272,7 @@ line_wind_gust_dur <- variogramLine(vgm(psill = fit_wind_gust_dur$psill[2], "Gau
 plot_gust_dur <- ggplot(variog_wind_gust_dur) + 
   geom_point(aes(x = dist, y = gamma, color = dist)) + 
   geom_line(data = line_wind_gust_dur, aes(x = dist, y = gamma), color = "red") + 
-  ggtitle("Humberto-2007 Variogram -- gust wind duration") + theme_bw() + 
+  ggtitle("Variogram -- gust wind duration") + theme_bw() + 
   theme(legend.position = "none")
 
 # variogram: sustained wind duration
@@ -272,10 +284,10 @@ line_wind_sust_dur <- variogramLine(vgm(psill = fit_wind_sust_dur$psill[2], "Gau
 plot_sust_dur <- ggplot(variog_wind_sust_dur) + 
   geom_point(aes(x = dist, y = gamma, color = dist)) + 
   geom_line(data = line_wind_sust_dur, aes(x = dist, y = gamma), color = "red") + 
-  ggtitle("Humberto-2007 Variogram -- sustained wind duration") + theme_bw() + 
+  ggtitle("Variogram -- sustained wind duration") + theme_bw() + 
   theme(legend.position = "none")
 
-grid.arrange(plot_wind_gust, plot_wind_sust, plot_gust_dur, plot_sust_dur)
+grid.arrange(plot_wind_gust, plot_wind_sust, plot_gust_dur, plot_sust_dur,ncol=2,nrow=2)
 
 ```
 
@@ -290,8 +302,7 @@ We generated plots from buoys 42019, 42035, and SRST2, which were significantly 
 
 Here is the date and time when Hurricane Humberto was closest to each buoy. 
 
-(Insert Buoy_location df)
-```{r}
+```{r,warning=FALSE,message=FALSE}
 # insert buoys data
 library(tidyverse)
 library(magrittr)
@@ -378,9 +389,8 @@ buoy_location$closest_date <- lubridate::ymd_hm(buoy_location$closest_date)
 buoy_location
 ```
 
-+ Time series
+## Time series
 
-(Insert three time-series plots)
 ```{r}
 hurr_Humberto2007 %<>% mutate(dist_42019 = NA, dist_42035 = NA, dist_srst2 = NA)
 for(i in 1:  dim(hurr_Humberto2007)[1]){
@@ -398,26 +408,31 @@ buoy_location$closest_date[2] <- hurr_Humberto2007$date[which(hurr_Humberto2007$
 buoy_location$closest_date[3] <- hurr_Humberto2007$date[which(hurr_Humberto2007$dist_srst2 == min(hurr_Humberto2007$dist_srst2))] 
 buoy_location$closest_date <- lubridate::ymd_hm(buoy_location$closest_date)
 
-ggplot(subset(buoy_raw, buoy == "buoy_42019"), aes(x = date_time, y = average_wind_speed)) +
+time42019 <- ggplot(subset(buoy_raw, buoy == "buoy_42019"), aes(x = date_time, y = average_wind_speed)) +
   geom_line() +
   geom_rect(aes(xmin=(buoy_location$closest_date[1] - 1*60*60*24),
                 xmax=(buoy_location$closest_date[1] + 1*60*60*24),
                 ymin=0, ymax=Inf), alpha = .01, fill = "#9898fb") +
-  xlab("Time") + ylab("Average wind speed(hourly)") + theme_bw()
+  xlab("") + ylab("") + theme_bw()+
+  ggtitle("Buoy_42019")
 
-ggplot(subset(buoy_raw, buoy == "buoy_42035"), aes(x = date_time, y = average_wind_speed)) +
+time42035 <- ggplot(subset(buoy_raw, buoy == "buoy_42035"), aes(x = date_time, y = average_wind_speed)) +
   geom_line() +
   geom_rect(aes(xmin=(buoy_location$closest_date[2] - 1*60*60*24),
                 xmax=(buoy_location$closest_date[2] + 1*60*60*24),
                 ymin=0, ymax=Inf), alpha = .01, fill = "#9898fb") +
-  xlab("Time") + ylab("Average wind speed(hourly)") + theme_bw()
+  xlab("") + ylab("Average wind speed(hourly)") + theme_bw()+
+  ggtitle("Buoy_42035")
 
-ggplot(subset(buoy_raw, buoy == "buoy_srst2"), aes(x = date_time, y = average_wind_speed)) +
+timeSRST2<- ggplot(subset(buoy_raw, buoy == "buoy_srst2"), aes(x = date_time, y = average_wind_speed)) +
   geom_line() +
   geom_rect(aes(xmin=(buoy_location$closest_date[3] - 1*60*60*24),
                 xmax=(buoy_location$closest_date[3] + 1*60*60*24),
                 ymin=0, ymax=Inf), alpha = .01, fill = "#9898fb") +
-  xlab("Time") + ylab("Average wind speed(hourly)") + theme_bw()
+  xlab("Time") + ylab("") + theme_bw()+
+  ggtitle("Buoy_srst2")
+
+grid.arrange(time42019,time42035,timeSRST2,nrow=3)
 ```
 
 From these figures, we can see that the wind speed at each of the three buoys had a period of rapidly increasing and then decreasing, which indicated that the period is when Hurricane Humberto was passing by each buoy. According to the weather report, the hurricane is notable for its exceptionally rapid intensification near the coast of Texas from a tropical depression into a hurricane within 19 hours. 
